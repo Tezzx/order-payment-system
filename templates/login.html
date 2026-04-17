@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录与注册</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        input:focus {
+            border-color: #4CAF50;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .register-btn {
+            background-color: #2196F3;
+        }
+        .register-btn:hover {
+            background-color: #0b7dda;
+        }
+        .message {
+            margin-top: 15px;
+            font-size: 14px;
+            min-height: 20px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>系统登录</h2>
+    <input type="text" id="username" placeholder="请输入用户名" required>
+    <input type="password" id="password" placeholder="请输入密码" required>
+    
+    <button onclick="handleRequest('/login')">登 录</button>
+    <button class="register-btn" onclick="handleRequest('/register')">注 册</button>
+
+    <div id="messageBox" class="message"></div>
+</div>
+
+<script>
+    const BASE_URL = "http://localhost:8081";
+
+    async function handleRequest(endpoint) {
+        const usernameInput = document.getElementById("username").value.trim();
+        const passwordInput = document.getElementById("password").value.trim();
+        const messageBox = document.getElementById("messageBox");
+
+        if (!usernameInput || !passwordInput) {
+            showMessage("用户名和密码不能为空", "error");
+            return;
+        }
+
+        showMessage("请求中...", "");
+
+        try {
+            const response = await fetch(BASE_URL + endpoint, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    Username: usernameInput,
+                    Password: passwordInput
+                })
+            });
+
+            const resData = await response.json();
+
+            if (resData.code === 0) {
+                showMessage(resData.data || "操作成功", "success");
+                
+                // ✅ 登录或注册成功后，延迟一小会儿跳转（让用户看到提示）
+                setTimeout(() => {
+                    window.location.replace("index.html");
+                }, 800); // 0.8秒后跳转
+                
+            } else {
+                showMessage(resData.msg, "error");
+            }
+
+        } catch (error) {
+            console.error("请求异常:", error);
+            showMessage("网络错误或跨域拦截，请检查控制台", "error");
+        }
+    }
+
+    function showMessage(msg, type) {
+        const messageBox = document.getElementById("messageBox");
+        messageBox.textContent = msg;
+        messageBox.className = "message " + type;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>首页 - 订单支付系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+        .logout-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 欢迎回来！</h1>
+        <p>您已成功登录订单支付系统。</p>
+        <p>在这里，您可以管理订单、发起支付、查看交易记录等。</p>
+        
+        <!-- 后续可扩展：显示用户名、订单列表等 -->
+        
+        <a href="/" class="logout-btn" onclick="logout(event)">退出登录</a>
+    </div>
+
+    <script>
+        function logout(e) {
+            e.preventDefault();
+            // 清除可能的 token（如果用 localStorage 存了）
+            localStorage.removeItem('token');
+            // 跳转回登录页
+            window.location.href = '/auth.html'; // 假设你的登录页叫 auth.html
+        }
+    </script>
+</body>
+</html>
