@@ -1,8 +1,11 @@
 package service
 
 import (
+	"errors"
 	"order-payment-system/internal/model"
 	"order-payment-system/internal/repository"
+	"order-payment-system/pkg/jwt"
+	"order-payment-system/pkg/util"
 )
 
 type UserService struct {
@@ -17,6 +20,14 @@ func NewUserService(userrepo *repository.UserRepo) *UserService {
 
 // 注册
 func (u *UserService) RegisterUser(userName, userPassword string) error {
+	bol, err := u.userRepo.CheckUsernameExists(userName)
+	if err != nil || bol == true {
+		return errors.New("用户已存在")
+	}
+	userPassword, err = util.HashPassword(userPassword)
+	if err != nil {
+		return err
+	}
 	user := model.User{
 		Username: userName,
 		Password: userPassword,
@@ -25,16 +36,15 @@ func (u *UserService) RegisterUser(userName, userPassword string) error {
 }
 
 // 登录
-func (u *UserService) LoginUser(userName, userPassword string) string {
+func (u *UserService) LoginUser(userName, userPassword string) error {
 	password, err := u.userRepo.GetByUsername(userName)
-	var s string
 	if err != nil {
-		s = "用户不存在"
-		return s
+		return err
 	}
-	if password != userPassword {
-		s = "账号或密码错误"
-		return s
-	}
-	return ""
+	return util.VerifyPassword(userPassword, password)
+}
+
+func (u *UserService) TokenCreate(userName string) (string, error) {
+	token, err := jwt.GenerateJWT(userName)
+	return token, err
 }

@@ -51,23 +51,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎉 欢迎回来！</h1>
-        <p>您已成功登录订单支付系统。</p>
-        <p>在这里，您可以管理订单、发起支付、查看交易记录等。</p>
+        <h1>🎉 欢迎！</h1>
+        <p>您未登录订单支付系统。</p>
+        <p>登录后，您可以管理订单、发起支付、查看交易记录等。</p>
         
         <!-- 后续可扩展：显示用户名、订单列表等 -->
         
-        <a href="/" class="logout-btn" onclick="logout(event)">退出登录</a>
+        <a href="/login.html" class="logout-btn">登录</a>
     </div>
 
-    <script>
-        function logout(e) {
-            e.preventDefault();
-            // 清除可能的 token（如果用 localStorage 存了）
-            localStorage.removeItem('token');
-            // 跳转回登录页
-            window.location.href = '/auth.html'; // 假设你的登录页叫 auth.html
-        }
-    </script>
 </body>
 </html>

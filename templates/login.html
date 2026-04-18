@@ -101,29 +101,34 @@
                 headers: {
                     "Content-Type": "application/json"
                 },
+                // 🔥 修复1：参数改成小写，匹配后端Gin绑定
                 body: JSON.stringify({
-                    Username: usernameInput,
-                    Password: passwordInput
+                    username: usernameInput,
+                    password: passwordInput
                 })
             });
 
             const resData = await response.json();
+            console.log("后端返回：", resData); // 调试用
 
-            if (resData.code === 0) {
-                showMessage(resData.data || "操作成功", "success");
+            // 🔥 修复2：根据你后端的响应格式判断成功（msg === success）
+            if (resData.msg === "success") {
+                showMessage(resData.msg, "success");
                 
-                // ✅ 登录或注册成功后，延迟一小会儿跳转（让用户看到提示）
-                setTimeout(() => {
-                    window.location.replace("index.html");
-                }, 800); // 0.8秒后跳转
+                
+                    setTimeout(() => {
+                        window.location.href = "api/main.html";
+                    }, 800);
+                
                 
             } else {
+                // 错误提示
                 showMessage(resData.msg, "error");
             }
 
         } catch (error) {
             console.error("请求异常:", error);
-            showMessage("网络错误或跨域拦截，请检查控制台", "error");
+            showMessage("网络异常或跨域拦截", "error");
         }
     }
 

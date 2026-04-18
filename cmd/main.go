@@ -48,7 +48,6 @@ func main() {
 	r.Use(middleware.CorsMiddleware())
 	//路径是根据工作路径来算而不是main.go所在路径
 	r.Static("/", "./templates")
-
 	r.POST("/register", userHandler.RegisterUser)
 	r.POST("/login", userHandler.LoginUser)
 

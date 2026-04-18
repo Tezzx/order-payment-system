@@ -32,15 +32,24 @@ func (u *UserHandler) RegisterUser(c *gin.Context) {
 	var req RegisterRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		response.Error(c, "参数错误")
+		response.Error(c, 400, "参数错误")
 		return
 	}
 	err = u.userService.RegisterUser(req.Username, req.Password)
-	if err != nil {
-		response.Error(c, "新用户创建失败")
+	if err.Error() == "用户已存在" {
+		response.Error(c, 400, "用户已存在")
+		return
+	} else if err != nil {
+		response.Error(c, 400, "新用户创建失败")
 		return
 	}
-	response.Success(c, "注册成功")
+	token, err := u.userService.TokenCreate(req.Username)
+	if err != nil {
+		response.Error(c, 500, "服务器无法生成token")
+		return
+	}
+	response.Success(c, token)
+
 }
 
 // 登录
@@ -48,14 +57,19 @@ func (u *UserHandler) LoginUser(c *gin.Context) {
 	var req LoginRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		response.Error(c, "参数错误")
+		response.Error(c, 400, "参数错误")
 		return
 	}
-	s := u.userService.LoginUser(req.Username, req.Password)
-	if s != "" {
-		response.Error(c, s)
+	err = u.userService.LoginUser(req.Username, req.Password)
+	if err != nil {
+		response.Error(c, 400, "账户或密码错误")
 		return
 	}
-	response.Success(c, "登录成功")
+	token, err := u.userService.TokenCreate(req.Username)
+	if err != nil {
+		response.Error(c, 500, "服务器无法生成token")
+		return
+	}
+	response.Success(c, token)
 
 }
