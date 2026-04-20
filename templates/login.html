@@ -115,9 +115,16 @@
             if (resData.msg === "success") {
                 showMessage(resData.msg, "success");
                 
-                
+                                const token = resData.data; // 后端返回的token字符串
+                if (token) {
+                    // 保存到localStorage（也可换sessionStorage）
+                    localStorage.setItem("userToken", token);
+                    // 可选：也可以保存用户名等信息
+                    localStorage.setItem("username", usernameInput);
+                }
+
                     setTimeout(() => {
-                        window.location.href = "api/main.html";
+                        window.location.href = "/";
                     }, 800);
                 
                 

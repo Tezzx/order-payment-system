@@ -1,64 +1,163 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>首页 - 订单支付系统</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单支付系统</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f7fa;
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* 渐变背景 - 现代美观 */
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
+
+        /* 主容器 */
         .container {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 480px;
+        }
+
+        /* 系统标题 */
+        .system-title {
             text-align: center;
-            max-width: 500px;
-            width: 90%;
+            color: white;
+            font-size: 28px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 20px;
+
+        /* 登录卡片 */
+        .login-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         }
-        p {
-            color: #7f8c8d;
-            line-height: 1.6;
-        }
-        .logout-btn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #e74c3c;
+
+        .login-btn {
+            background: linear-gradient(135deg, #409eff, #2678e6);
             color: white;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            padding: 14px 40px;
+            border-radius: 50px;
             font-size: 16px;
-            text-decoration: none;
-            display: inline-block;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(64,158,255,0.3);
         }
-        .logout-btn:hover {
-            background-color: #c0392b;
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(64,158,255,0.4);
+        }
+
+        /* 商品卡片 */
+        .goods-card {
+            background: white;
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+
+        .goods-name {
+            font-size: 22px;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .price {
+            font-size: 32px;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        /* 下单按钮 */
+        .buy-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #27ae60, #219653);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 16px rgba(39,174,96,0.3);
+        }
+
+        .buy-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(39,174,96,0.4);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎉 欢迎！</h1>
-        <p>您未登录订单支付系统。</p>
-        <p>登录后，您可以管理订单、发起支付、查看交易记录等。</p>
-        
-        <!-- 后续可扩展：显示用户名、订单列表等 -->
-        
-        <a href="/login.html" class="logout-btn">登录</a>
+        <h2 class="system-title">订单支付系统</h2>
+
+        <!-- 登录区域 -->
+        <div class="login-card">
+            <button class="login-btn" onclick="location.href='/auth'"> 用户登录</button>
+        </div>
+
+        <!-- 商品区域（后端渲染数据） -->
+        <div class="goods-card">
+            <h3 class="goods-name">{{.goodsName}}</h3>
+            <div class="price">¥ {{.price}}</div>
+            <button class="buy-btn" onclick="createOrder()">立即下单支付</button>
+        </div>
     </div>
 
+<script>
+    function createOrder() {
+        // 1. 从本地存储取出登录时保存的 Token
+        const token = localStorage.getItem('userToken');
+        
+        // 2. 没有Token → 禁止下单，跳回登录页
+        if (!token) {
+            alert('请先登录再下单！');
+            window.location.href = '/auth';
+            return;
+        }
+
+        if(!confirm('确认下单？')) return;
+
+        // 3. 核心：发送请求时，在请求头里带上Token
+        fetch('/order/create', {
+            method: 'POST',
+            // 请求头（报文头）→ 后端在这里取Token
+            headers: {
+                "Content-Type": "application/json",
+                // 行业标准写法：Bearer + Token
+                "Authorization": "Bearer " + token
+            }
+        })
+        .then(res=>res.json())
+        .then(data=>{
+            alert(data.msg)
+            window.location.href = '/order/pay'; 
+        });
+    }
+</script>
 </body>
 </html>

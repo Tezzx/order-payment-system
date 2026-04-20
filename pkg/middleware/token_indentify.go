@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 验证token
 func TokenIdentify() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -23,13 +24,13 @@ func TokenIdentify() gin.HandlerFunc {
 			return
 		}
 		tokenStr := authHeader[len(bearerPrefix):]
-		_, err := jwt.ValidateJWT(tokenStr)
+		claims, err := jwt.ValidateJWT(tokenStr)
 		if err != nil {
 			response.Error(c, 401, "token过期或错误")
 			c.Abort()
 			return
 		}
-
+		c.Set("userID", claims.UserID)
 		c.Next()
 	}
 }

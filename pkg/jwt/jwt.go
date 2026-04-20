@@ -9,15 +9,15 @@ import (
 var jwtKey = []byte("my-secret-key")
 
 type Claims struct {
-	Username             string `json:"username"`
-	jwt.RegisteredClaims        // 包含过期时间、签发者等标准字段
+	UserID               uint `json:"userid"`
+	jwt.RegisteredClaims      // 包含过期时间、签发者等标准字段
 }
 
 // 生成token
-func GenerateJWT(username string) (string, error) {
-	expirationTime := time.Now().Add(30 * time.Second) //30秒过期，测试用
+func GenerateJWT(userID uint) (string, error) {
+	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
-		Username: username,
+		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

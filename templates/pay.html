@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .pay-box {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        .title {
+            font-size: 26px;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        .price {
+            font-size: 36px;
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .pay-btn {
+            width: 100%;
+            padding: 18px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        .back-btn {
+            width: 100%;
+            padding: 18px;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="pay-box">
+        <h2 class="title">订单支付</h2>
+        <p>需支付金额：</p>
+        <!-- 后端渲染支付金额 -->
+        <div class="price">¥ {{.price}}</div>
+        <button class="pay-btn">确认支付</button>
+        <button class="back-btn" onclick="location.href='/'">返回首页</button>
+    </div>
+</body>
+</html>

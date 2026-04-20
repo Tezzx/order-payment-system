@@ -16,6 +16,7 @@ func NewUserRepo(db *gorm.DB) *UserRepo {
 	}
 }
 
+// 创建用户
 func (u *UserRepo) CreateUser(user *model.User) error {
 	err := u.db.Create(user).Error
 	return err
@@ -29,11 +30,23 @@ func (u *UserRepo) GetByUsername(username string) (string, error) {
 	}
 	return user.Password, nil
 }
-func (r *UserRepo) CheckUsernameExists(username string) (bool, error) {
+func (u *UserRepo) CheckUsernameExists(username string) (bool, error) {
 	var count int64
-	err := r.db.Model(&model.User{}).Where("username = ?", username).Count(&count).Error
+	err := u.db.Model(&model.User{}).Where("username = ?", username).Count(&count).Error
 	if err != nil {
 		return false, err
 	}
 	return count > 0, nil
+}
+func (u *UserRepo) GetID(username string) (uint, error) {
+	var userID uint
+	err := u.db.Model(&model.User{}).
+		Select("id").
+		Where("username = ?", username).
+		Scan(&userID).
+		Error
+	if err != nil {
+		return 0, err
+	}
+	return userID, nil
 }

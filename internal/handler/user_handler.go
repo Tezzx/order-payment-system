@@ -35,7 +35,7 @@ func (u *UserHandler) RegisterUser(c *gin.Context) {
 		response.Error(c, 400, "参数错误")
 		return
 	}
-	err = u.userService.RegisterUser(req.Username, req.Password)
+	userID, err := u.userService.RegisterUser(req.Username, req.Password)
 	if err.Error() == "用户已存在" {
 		response.Error(c, 400, "用户已存在")
 		return
@@ -43,7 +43,8 @@ func (u *UserHandler) RegisterUser(c *gin.Context) {
 		response.Error(c, 400, "新用户创建失败")
 		return
 	}
-	token, err := u.userService.TokenCreate(req.Username)
+
+	token, err := u.userService.TokenCreate(userID)
 	if err != nil {
 		response.Error(c, 500, "服务器无法生成token")
 		return
@@ -60,12 +61,12 @@ func (u *UserHandler) LoginUser(c *gin.Context) {
 		response.Error(c, 400, "参数错误")
 		return
 	}
-	err = u.userService.LoginUser(req.Username, req.Password)
+	userID, err := u.userService.LoginUser(req.Username, req.Password)
 	if err != nil {
 		response.Error(c, 400, "账户或密码错误")
 		return
 	}
-	token, err := u.userService.TokenCreate(req.Username)
+	token, err := u.userService.TokenCreate(userID)
 	if err != nil {
 		response.Error(c, 500, "服务器无法生成token")
 		return
