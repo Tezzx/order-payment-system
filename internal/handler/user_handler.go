@@ -36,10 +36,7 @@ func (u *UserHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 	userID, err := u.userService.RegisterUser(req.Username, req.Password)
-	if err.Error() == "用户已存在" {
-		response.Error(c, 400, "用户已存在")
-		return
-	} else if err != nil {
+	if err != nil {
 		response.Error(c, 400, "新用户创建失败")
 		return
 	}

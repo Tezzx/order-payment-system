@@ -19,6 +19,6 @@ func (s *GoodsService) CreateGoods(goods *model.Goods) error {
 	return s.goodsRepo.CreateGoods(goods)
 }
 
-func (s *GoodsService) GetGoodsInfoByID(goodsID uint) (price, goodsNum uint, err error) {
+func (s *GoodsService) GetGoodsInfoByID(goodsID uint) (price, goodsNum uint, goodsName string, err error) {
 	return s.goodsRepo.GetGoodsByID(goodsID)
 }

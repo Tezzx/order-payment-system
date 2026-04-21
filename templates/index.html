@@ -12,40 +12,35 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* 渐变背景 - 现代美观 */
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 20px;
         }
 
-        /* 主容器 */
         .container {
             width: 100%;
-            max-width: 480px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        /* 系统标题 */
         .system-title {
             text-align: center;
             color: white;
             font-size: 28px;
-            margin-bottom: 30px;
+            margin: 30px 0;
             font-weight: 600;
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* 登录卡片 */
         .login-card {
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(10px);
             border-radius: 16px;
             padding: 25px;
             text-align: center;
-            margin-bottom: 25px;
+            margin: 0 auto 30px;
+            max-width: 480px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         }
 
@@ -67,13 +62,24 @@
             box-shadow: 0 6px 16px rgba(64,158,255,0.4);
         }
 
-        /* 商品卡片 */
+        .goods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            padding: 0 10px;
+        }
+
         .goods-card {
             background: white;
             border-radius: 18px;
-            padding: 35px;
+            padding: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .goods-card:hover {
+            transform: translateY(-5px);
         }
 
         .goods-name {
@@ -87,10 +93,33 @@
             font-size: 32px;
             color: #e74c3c;
             font-weight: bold;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
-        /* 下单按钮 */
+        .count-input-wrap {
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .count-label {
+            font-size: 16px;
+            color: #34495e;
+            font-weight: 500;
+        }
+
+        .count-input {
+            width: 80px;
+            padding: 10px;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+        }
+
         .buy-btn {
             width: 100%;
             background: linear-gradient(135deg, #27ae60, #219653);
@@ -99,15 +128,7 @@
             padding: 16px;
             border-radius: 12px;
             font-size: 17px;
-            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 16px rgba(39,174,96,0.3);
-        }
-
-        .buy-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(39,174,96,0.4);
         }
     </style>
 </head>
@@ -115,48 +136,72 @@
     <div class="container">
         <h2 class="system-title">订单支付系统</h2>
 
-        <!-- 登录区域 -->
         <div class="login-card">
-            <button class="login-btn" onclick="location.href='/auth'"> 用户登录</button>
+            <button class="login-btn" onclick="location.href='/auth'">用户登录</button>
         </div>
 
-        <!-- 商品区域（后端渲染数据） -->
-        <div class="goods-card">
-            <h3 class="goods-name">{{.goodsName}}</h3>
-            <div class="price">¥ {{.price}}</div>
-            <button class="buy-btn" onclick="createOrder()">立即下单支付</button>
+        <div class="goods-grid">
+            {{range .goodsList}}
+            <div class="goods-card">
+                <h3 class="goods-name">{{.GoodsName}}</h3>
+                <div class="price">¥ {{.Price}}</div>
+                <div class="count-input-wrap">
+                    <span class="count-label">购买数量：</span>
+                    <input type="number" class="count-input" id="count-{{.ID}}" min="1" value="1">
+                </div>
+                <!-- 修复：无引号，数字ID直接传 -->
+                <button class="buy-btn" onclick="createOrder('{{.ID}}')">立即下单支付</button>
+            </div>
+            {{end}}
         </div>
     </div>
 
 <script>
-    function createOrder() {
-        // 1. 从本地存储取出登录时保存的 Token
+    function createOrder(goodsId) {
+        // 1. 校验登录
         const token = localStorage.getItem('userToken');
-        
-        // 2. 没有Token → 禁止下单，跳回登录页
         if (!token) {
             alert('请先登录再下单！');
             window.location.href = '/auth';
             return;
         }
 
-        if(!confirm('确认下单？')) return;
+        // 2. 获取购买数量
+        const buyNum = parseInt(document.getElementById(`count-${goodsId}`).value);
+        if (isNaN(buyNum) || buyNum < 1) {
+            alert('购买数量必须大于0');
+            return;
+        }
 
-        // 3. 核心：发送请求时，在请求头里带上Token
+        if (!confirm(`确认购买 ${buyNum} 件？`)) return;
+
+        // 3. 发送请求（✅ 核心修复：参数名和后端统一为 buyNum）
         fetch('/order/create', {
             method: 'POST',
-            // 请求头（报文头）→ 后端在这里取Token
             headers: {
                 "Content-Type": "application/json",
-                // 行业标准写法：Bearer + Token
                 "Authorization": "Bearer " + token
-            }
+            },
+            body: JSON.stringify({
+                goodsId: parseInt(goodsId),
+                buyNum: buyNum  
+            })
         })
-        .then(res=>res.json())
-        .then(data=>{
-            alert(data.msg)
-            window.location.href = '/order/pay'; 
-        });
+        .then(res => res.json())
+        .then(data => {
+            alert(data.msg);
+                const token = localStorage.getItem('userToken'); 
+                if (!token) {
+                    alert("请先登录");
+                    window.location.href = "/auth";
+                    return;
+                }
+                const orderNo = data.data.orderNo; 
+                window.location.href = `/order/pay?orderNo=${orderNo}`;
+            
+        })
+
+        .catch(err => alert('请求错误：' + err.message));
     }
 </script>
 </body>

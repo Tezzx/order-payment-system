@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"order-payment-system/internal/model"
 	"order-payment-system/internal/repository"
 	"order-payment-system/pkg/jwt"
@@ -22,7 +21,7 @@ func NewUserService(userRepo *repository.UserRepo) *UserService {
 func (u *UserService) RegisterUser(userName, userPassword string) (uint, error) {
 	bol, err := u.userRepo.CheckUsernameExists(userName)
 	if err != nil || bol == true {
-		return 0, errors.New("用户已存在")
+		return 0, err
 	}
 	userPassword, err = util.HashPassword(userPassword)
 	if err != nil {
@@ -31,6 +30,7 @@ func (u *UserService) RegisterUser(userName, userPassword string) (uint, error) 
 	user := model.User{
 		Username: userName,
 		Password: userPassword,
+		Balance:  10000,
 	}
 	userID, err := u.userRepo.GetID(userName)
 	if err != nil {

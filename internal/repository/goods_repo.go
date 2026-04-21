@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"order-payment-system/internal/model"
 
 	"gorm.io/gorm"
@@ -18,7 +19,7 @@ func NewGoodsRepo(db *gorm.DB) *GoodsRepo {
 
 // CreateGoods 创建商品，商品名重复则覆盖旧数据
 func (g *GoodsRepo) CreateGoods(goods *model.Goods) error {
-	// 1. 根据商品名称查询是否已存在
+	//根据商品名称查询是否已存在
 	var existGoods model.Goods
 	err := g.db.Where("goodsname = ?", goods.Goodsname).First(&existGoods).Error
 
@@ -32,12 +33,24 @@ func (g *GoodsRepo) CreateGoods(goods *model.Goods) error {
 	return g.db.Model(&existGoods).Omit("id").Updates(goods).Error
 }
 
-// 根据商品ID获取 商品价格 和 库存数量
-func (g *GoodsRepo) GetGoodsByID(goodsID uint) (price, goodsNum uint, err error) {
+// 根据商品ID获取 商品价格 和 库存数量和商品名
+func (g *GoodsRepo) GetGoodsByID(goodsID uint) (price, goodsNum uint, goodsName string, err error) {
 	var goods model.Goods
-	err = g.db.Where("id = ?", goodsID).Select("price, goodsnum").First(&goods).Error
+	err = g.db.Where("id = ?", goodsID).Select("price, goodsnum,goodsname").First(&goods).Error
 	if err != nil {
-		return 0, 0, err
+		return 0, 0, "", err
 	}
-	return goods.Price, goods.Goodsnum, nil
+	return goods.Price, goods.Goodsnum, goods.Goodsname, nil
+}
+
+// 扣减商品库存
+func (g *GoodsRepo) ReduceStock(goodsID uint, num uint) error {
+	result := g.db.Model(&model.Goods{}).
+		Where("id = ? AND goodsnum >= ?", goodsID, num).
+		UpdateColumn("goodsnum", gorm.Expr("goodsnum - ?", num))
+
+	if result.RowsAffected == 0 {
+		return errors.New("库存不足")
+	}
+	return result.Error
 }

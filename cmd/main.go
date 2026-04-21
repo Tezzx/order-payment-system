@@ -32,7 +32,7 @@ func main() {
 	fmt.Println("数据库连接成功")
 
 	//自动建表
-	err = db.AutoMigrate(&model.User{}, &model.Goods{})
+	err = db.AutoMigrate(&model.User{}, &model.Goods{}, &model.Order{})
 	if err != nil {
 		fmt.Println("数据表创建失败:", err)
 		return
@@ -46,6 +46,11 @@ func main() {
 	goodsRepo := repository.NewGoodsRepo(db)
 	goodsService := service.NewGoodsService(goodsRepo)
 	goodsHandler := handler.NewGoodsHandler(goodsService)
+
+	orderRepo := repository.NewOrderRepo(db)
+	orderService := service.NewOrderService(orderRepo, goodsRepo)
+	orderHandler := handler.NewOrderHandler(orderService)
+
 	//商品数据库初始化
 	goodsHandler.GoodsInitial()
 
@@ -54,27 +59,36 @@ func main() {
 	r.Use(middleware.CorsMiddleware())
 	//路径是根据工作路径来算而不是main.go所在路径
 	r.LoadHTMLGlob("templates/*")
+
 	r.GET("/", func(c *gin.Context) {
+		type GoodsItem struct {
+			ID        string
+			GoodsName string
+			Price     uint
+		}
+
+		goodsList := []GoodsItem{
+			{ID: "1", GoodsName: "雪影娃娃", Price: 1200},
+			{ID: "2", GoodsName: "恶魔狼", Price: 600},
+			{ID: "3", GoodsName: "治愈兔", Price: 1800},
+			{ID: "4", GoodsName: "月牙雪熊", Price: 1800},
+		}
+
 		c.HTML(200, "index.html", gin.H{
-			"goodsName": "异色拉特",
-			"price":     99.00,
+			"goodsList": goodsList,
 		})
 	})
+
 	r.GET("/auth", func(c *gin.Context) {
 		c.HTML(200, "login.html", nil)
 	})
+
 	r.POST("/register", userHandler.RegisterUser)
 	r.POST("/login", userHandler.LoginUser)
 
 	order := r.Group("/order")
 	{
-		order.POST("/create", middleware.TokenIdentify(), func(c *gin.Context) {
-			c.JSON(200, gin.H{
-				"code": 200,
-				"msg":  "下单成功！等待支付",
-			})
-			//创建订单
-		})
+		order.POST("/create", middleware.TokenIdentify(), orderHandler.CreateOrder)
 
 		order.GET("/pay", func(c *gin.Context) {
 			c.HTML(200, "pay.html", gin.H{
