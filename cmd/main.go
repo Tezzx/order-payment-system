@@ -51,6 +51,9 @@ func main() {
 	orderService := service.NewOrderService(orderRepo, goodsRepo)
 	orderHandler := handler.NewOrderHandler(orderService)
 
+	paymentService := service.NewPaymentService(orderRepo, userRepo)
+	paymentHandler := handler.NewPaymentHandler(paymentService)
+
 	//商品数据库初始化
 	goodsHandler.GoodsInitial()
 
@@ -90,12 +93,14 @@ func main() {
 	{
 		order.POST("/create", middleware.TokenIdentify(), orderHandler.CreateOrder)
 
-		order.GET("/pay", func(c *gin.Context) {
-			c.HTML(200, "pay.html", gin.H{
-				"price": 99.00,
-			})
-		})
-	}
+		order.GET("/topay", orderHandler.ToPay)
 
+	}
+	payment := r.Group("/payment")
+	{
+		payment.POST("/ensure", middleware.TokenIdentify(), paymentHandler.MakeSure)
+
+		payment.POST("/settle", middleware.TokenIdentify(), paymentHandler.Settle)
+	}
 	r.Run(":" + port)
 }

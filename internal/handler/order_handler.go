@@ -53,30 +53,7 @@ func (o *OrderHandler) CreateOrder(c *gin.Context) {
 	response.Success(c, order.OrderNo)
 }
 
-//获取我的订单
-/*
-func (o *OrderHandler) GetMyOrderList(c *gin.Context) {
-	userID := uint(1) // 正式环境解析Token获取
-	orders, err := o.orderService.GetUserOrderList(userID)
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"code": 500, "msg": "获取订单失败"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"code": 200, "data": orders})
-}
-*/
+func (o *OrderHandler) ToPay(c *gin.Context) {
+	c.HTML(200, "pay.html", nil)
 
-//支付订单接口
-/*
-func (o *OrderHandler) PayOrder(c *gin.Context) {
-	orderIDStr := c.PostForm("orderId")
-	orderID, _ := strconv.Atoi(orderIDStr)
-
-	err := o.orderService.PayOrder(uint(orderID))
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"code": 500, "msg": "支付失败"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "支付成功"})
 }
-*/

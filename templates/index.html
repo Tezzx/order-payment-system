@@ -196,8 +196,8 @@
                     window.location.href = "/auth";
                     return;
                 }
-                const orderNo = data.data.orderNo; 
-                window.location.href = `/order/pay?orderNo=${orderNo}`;
+                const orderNo = data.data; 
+                window.location.href = `/order/topay?orderNo=${orderNo}`;
             
         })
 

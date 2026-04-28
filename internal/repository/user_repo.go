@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"order-payment-system/internal/model"
 
 	"gorm.io/gorm"
@@ -17,9 +18,10 @@ func NewUserRepo(db *gorm.DB) *UserRepo {
 }
 
 // 创建用户
-func (u *UserRepo) CreateUser(user *model.User) error {
+func (u *UserRepo) CreateUser(user *model.User) (uint, error) {
 	err := u.db.Create(user).Error
-	return err
+	id, err := u.GetID(user.Username)
+	return id, err
 }
 
 func (u *UserRepo) GetByUsername(username string) (string, error) {
@@ -49,4 +51,19 @@ func (u *UserRepo) GetID(username string) (uint, error) {
 		return 0, err
 	}
 	return userID, nil
+}
+
+func (u *UserRepo) Deduct(userId, balance uint) error {
+	var user model.User
+	err := u.db.Where("id=?", userId).Select("balance").First(&user).Error
+	if err != nil {
+		return err
+	}
+	if balance > user.Balance {
+		return errors.New("余额不足")
+	} else {
+		newBalance := user.Balance - balance
+		err = u.db.Model(&model.User{}).Where("id = ?", userId).Update("balance", newBalance).Error
+		return err
+	}
 }
